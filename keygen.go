@@ -1,5 +1,5 @@
 package ssh
 
-func GenetateKeys() ([]byte, []byte, error) {
+func GenerateKeys() ([]byte, []byte, error) {
 	return nil, nil, nil
 }

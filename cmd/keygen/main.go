@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	ssh "github.com/barcollin/go_ssh"
 )
 
 func main() {
@@ -12,9 +14,10 @@ func main() {
 		err        error
 	)
 
-	if privateKey, plublicKey, err = ssh.GenerateKeys(); err != nil {
+	if privateKey, publicKey, err = ssh.GenerateKeys(); err != nil {
 		fmt.Printf("Error: %s\n", err)
 		os.Exit(1)
+
 	}
 
 	if err = os.WriteFile("mykey.pem", privateKey, 0600); err != nil {
