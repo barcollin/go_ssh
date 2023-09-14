@@ -6,6 +6,8 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+
+	"golang.org/x/crypto/ssh"
 )
 
 func GenerateKeys() ([]byte, []byte, error) {
@@ -19,5 +21,10 @@ func GenerateKeys() ([]byte, []byte, error) {
 		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
 	}
 
-	return pem.EncodeToMemory(privateKeyPem), nil, nil
+	publicKey, err := ssh.NewPublicKey(&privateKey.PublicKey)
+	if err != nil {
+		return nil, nil, fmt.Errorf("NewPublicKey error: %s", err)
+	}
+
+	return pem.EncodeToMemory(privateKeyPem), ssh.MarshalAuthorizedKey(publicKey), nil
 }
