@@ -19,5 +19,5 @@ func GenerateKeys() ([]byte, []byte, error) {
 		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
 	}
 
-	return privateKeyPem.Bytes, nil, nil
+	return pem.EncodeToMemory(privateKeyPem), nil, nil
 }
