@@ -47,17 +47,18 @@ func StartServer(privateKey []byte, authorizedKeys []byte) error {
 		return fmt.Errorf("Listen error: %s", err)
 	}
 
-	nConn, err := listener.Accept()
-	if err != nil {
-		fmt.Printf("Listener accept error: %s\n", err)
-	}
+	for {
 
-	conn, _, _, err := ssh.NewServerConn(nConn, config)
-	if err != nil {
-		fmt.Printf("NewServerConn error: %s\n", err)
-	}
-	log.Printf("logged in with key %s", conn.Permissions.Extensions["pubkey-fp"])
+		nConn, err := listener.Accept()
+		if err != nil {
+			fmt.Printf("Listener accept error: %s\n", err)
+		}
 
-	return nil
+		conn, _, _, err := ssh.NewServerConn(nConn, config)
+		if err != nil {
+			fmt.Printf("NewServerConn error: %s\n", err)
+		}
+		log.Printf("logged in with key %s", conn.Permissions.Extensions["pubkey-fp"])
+	}
 
 }
