@@ -54,13 +54,39 @@ func StartServer(privateKey []byte, authorizedKeys []byte) error {
 			fmt.Printf("Listener accept error: %s\n", err)
 		}
 
-		conn, _, _, err := ssh.NewServerConn(nConn, config)
+		conn, chans, reqs, err := ssh.NewServerConn(nConn, config)
 		if err != nil {
 			fmt.Printf("NewServerConn error: %s\n", err)
 		}
 		if conn != nil && conn.Permissions != nil {
 			log.Printf("logged in with key %s", conn.Permissions.Extensions["pubkey-fp"])
 		}
+
+		// The incoming Request channel must be serviced.
+		go ssh.DiscardRequests(reqs)
+
+		go handleConnection(conn, chans)
+
 	}
 
+}
+
+func handleConnection(conn *ssh.ServerConn, chans <-chan ssh.NewChannel) {
+	for newChannel := range chans {
+		if newChannel.ChannelType() != "session" {
+			newChannel.Reject(ssh.UnknownChannelType, "unknown channel type")
+			continue
+		}
+		_, requests, err := newChannel.Accept()
+		if err != nil {
+			fmt.Printf("Could not accept channel: %v", err)
+		}
+
+		go func(in <-chan *ssh.Request) {
+			for req := range in {
+				fmt.Printf("Request Type made by client: %s\n", req.Type)
+				req.Reply(req.Type == "shell", nil)
+			}
+		}(requests)
+	}
 }
