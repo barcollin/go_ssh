@@ -85,7 +85,13 @@ func handleConnection(conn *ssh.ServerConn, chans <-chan ssh.NewChannel) {
 		go func(in <-chan *ssh.Request) {
 			for req := range in {
 				fmt.Printf("Request Type made by client: %s\n", req.Type)
-				req.Reply(req.Type == "shell", nil)
+				switch req.Type {
+				case "shell":
+					req.Reply(true, nil)
+				case "pty-req":
+				default:
+					req.Reply(false, nil)
+				}
 			}
 		}(requests)
 	}
