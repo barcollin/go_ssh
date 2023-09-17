@@ -58,7 +58,9 @@ func StartServer(privateKey []byte, authorizedKeys []byte) error {
 		if err != nil {
 			fmt.Printf("NewServerConn error: %s\n", err)
 		}
-		log.Printf("logged in with key %s", conn.Permissions.Extensions["pubkey-fp"])
+		if conn != nil && conn.Permissions != nil {
+			log.Printf("logged in with key %s", conn.Permissions.Extensions["pubkey-fp"])
+		}
 	}
 
 }
