@@ -111,10 +111,10 @@ func createTerminal(conn *ssh.ServerConn, channel ssh.Channel) {
 				fmt.Printf("ReadLine error: %s:", err)
 				break
 			}
-
 			switch line {
 			case "whoami":
 				termInstance.Write([]byte(fmt.Sprintf("You are : %s", conn.Conn.User())))
+			case "":
 			default:
 				termInstance.Write([]byte("Command not found"))
 			}
