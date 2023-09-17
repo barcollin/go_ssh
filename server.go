@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/term"
 )
 
 func StartServer(privateKey []byte, authorizedKeys []byte) error {
@@ -77,7 +78,7 @@ func handleConnection(conn *ssh.ServerConn, chans <-chan ssh.NewChannel) {
 			newChannel.Reject(ssh.UnknownChannelType, "unknown channel type")
 			continue
 		}
-		_, requests, err := newChannel.Accept()
+		channel, requests, err := newChannel.Accept()
 		if err != nil {
 			fmt.Printf("Could not accept channel: %v", err)
 		}
@@ -89,10 +90,34 @@ func handleConnection(conn *ssh.ServerConn, chans <-chan ssh.NewChannel) {
 				case "shell":
 					req.Reply(true, nil)
 				case "pty-req":
+					createTerminal(conn, channel)
 				default:
 					req.Reply(false, nil)
 				}
 			}
 		}(requests)
 	}
+}
+
+func createTerminal(conn *ssh.ServerConn, channel ssh.Channel) {
+	termInstance := term.NewTerminal(channel, "-> ")
+
+	defer channel.Close()
+
+	go func() {
+		for {
+			line, err := termInstance.ReadLine()
+			if err != nil {
+				fmt.Printf("ReadLine error: %s:", err)
+				break
+			}
+
+			switch line {
+			case "whoami":
+				termInstance.Write([]byte(fmt.Sprintf("You are : %s", conn.Conn.User())))
+			default:
+				termInstance.Write([]byte("Command not found"))
+			}
+		}
+	}()
 }
