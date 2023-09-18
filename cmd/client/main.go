@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -44,4 +45,20 @@ func main() {
 		log.Fatal("Failed to dial: ", err)
 	}
 	defer client.Close()
+
+	session, err := client.NewSession()
+	if err != nil {
+		log.Fatal("NewSession error: ", err)
+	}
+
+	defer session.Close()
+
+	var out []byte
+	out, err = session.Output("whoami")
+	if err != nil {
+		log.Fatal("Session output error: ", err)
+	}
+
+	fmt.Printf("Output is: %s\n", out)
+
 }
