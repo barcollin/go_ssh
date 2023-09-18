@@ -88,6 +88,7 @@ func handleConnection(conn *ssh.ServerConn, chans <-chan ssh.NewChannel) {
 				fmt.Printf("Request Type made by client: %s\n", req.Type)
 				switch req.Type {
 				case "exec":
+					execSomething(req.Payload)
 					req.Reply(true, nil)
 				case "shell":
 					req.Reply(true, nil)
@@ -114,7 +115,7 @@ func createTerminal(conn *ssh.ServerConn, channel ssh.Channel) {
 			}
 			switch line {
 			case "whoami":
-				termInstance.Write([]byte(fmt.Sprintf("You are : %s\n", conn.Conn.User())))
+				termInstance.Write([]byte(execSomething(conn, []byte("whoami"))))
 			case "":
 			case "quit":
 				termInstance.Write([]byte("Goodbye!\n"))
@@ -124,4 +125,14 @@ func createTerminal(conn *ssh.ServerConn, channel ssh.Channel) {
 			}
 		}
 	}()
+}
+
+func execSomething(conn *ssh.ServerConn, payload []byte) string {
+
+	switch string(payload) {
+	case "whoami":
+		return fmt.Sprintf("You are: %s\n", conn.Conn.User())
+	default:
+		return fmt.Sprintf("Command Not Found: %s\n", string(payload))
+	}
 }
