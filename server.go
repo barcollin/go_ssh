@@ -91,7 +91,9 @@ func handleConnection(conn *ssh.ServerConn, chans <-chan ssh.NewChannel) {
 				case "exec":
 					payload := bytes.TrimPrefix(req.Payload, []byte{0, 0, 0, 6})
 					channel.Write([]byte(execSomething(conn, payload)))
+					channel.SendRequest("exit-status", false, []byte{0, 0, 0, 0})
 					req.Reply(true, nil)
+					channel.Close()
 				case "shell":
 					req.Reply(true, nil)
 				case "pty-req":
