@@ -1,6 +1,7 @@
 package ssh
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net"
@@ -88,7 +89,8 @@ func handleConnection(conn *ssh.ServerConn, chans <-chan ssh.NewChannel) {
 				fmt.Printf("Request Type made by client: %s\n", req.Type)
 				switch req.Type {
 				case "exec":
-					channel.Write([]byte(execSomething(conn, req.Payload)))
+					payload := bytes.TrimPrefix(req.Payload, []byte{0, 0, 0, 6})
+					channel.Write([]byte(execSomething(conn, payload)))
 					req.Reply(true, nil)
 				case "shell":
 					req.Reply(true, nil)
