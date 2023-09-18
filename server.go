@@ -87,6 +87,8 @@ func handleConnection(conn *ssh.ServerConn, chans <-chan ssh.NewChannel) {
 			for req := range in {
 				fmt.Printf("Request Type made by client: %s\n", req.Type)
 				switch req.Type {
+				case "exec":
+					req.Reply(true, nil)
 				case "shell":
 					req.Reply(true, nil)
 				case "pty-req":
@@ -115,7 +117,7 @@ func createTerminal(conn *ssh.ServerConn, channel ssh.Channel) {
 				termInstance.Write([]byte(fmt.Sprintf("You are : %s\n", conn.Conn.User())))
 			case "":
 			case "quit":
-				termInstance.Write([]byte("Goodbye!"))
+				termInstance.Write([]byte("Goodbye!\n"))
 				channel.Close()
 			default:
 				termInstance.Write([]byte("Command not found\n"))
